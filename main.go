@@ -85,6 +85,8 @@ func getMetrics() {
 			"pod_name",
 			// Name of Node where pod is placed.
 			"node_name",
+			// Namespace
+			"namespace",
 		},
 	)
 
@@ -106,9 +108,10 @@ func getMetrics() {
 		for _, element := range raw["pods"].([]interface{}) {
 
 			podName := element.(map[string]interface{})["podRef"].(map[string]interface{})["name"].(string)
+			podNamespace := element.(map[string]interface{})["podRef"].(map[string]interface{})["namespace"].(string)
 			if ephemeralStorage, ok := element.(map[string]interface{})["ephemeral-storage"]; ok {
 				usedBytes := ephemeralStorage.(map[string]interface{})["usedBytes"].(float64)
-				opsQueued.With(prometheus.Labels{"pod_name": podName, "node_name": nodeName}).Set(usedBytes)
+				opsQueued.With(prometheus.Labels{"pod_name": podName, "node_name": nodeName, "namespace": podNamespace}).Set(usedBytes)
 				log.Debug().Msg(fmt.Sprintf("pod %s on %s with usedBytes: %s", podName, nodeName, usedBytes))
 			}
 		}
